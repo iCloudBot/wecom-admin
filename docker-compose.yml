@@ -1,0 +1,38 @@
+services:
+  wecom-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cleverest/wecom-admin:latest
+    container_name: wecom-admin
+    restart: unless-stopped
+
+    ports:
+      - "5005:5000"   # 宿主机端口:容器端口，可按需修改
+
+    environment:
+      # 生产环境务必替换为随机强密钥
+      - SECRET_KEY=${SECRET_KEY:-wecom-admin-secret-change-me}
+      - TZ=Asia/Shanghai
+
+    volumes:
+      # 将 SQLite 数据库文件持久化到宿主机，容器重建数据不丢失
+      - wecom_data:/app/data
+
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/auth/me')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  wecom_data:
+    driver: local

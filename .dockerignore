@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# 数据库文件（运行时由 volume 提供）
+data/
+*.db
+*.sqlite3
+
+# 开发工具
+.git/
+.gitignore
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# 测试
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker 自身
+Dockerfile
+docker-compose*.yml
+.dockerignore

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0a0f">
+<title>日寄 · Daily</title>
+<style>/* system fonts – no network */
+  :root{
+    --font-serif: 'Songti SC','SimSun','STSong','Georgia',serif;
+    --font-sans:  'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Helvetica Neue',sans-serif;
+  }
+</style>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rose:    #e8647a;
+    --rose-lt: #f5a8b5;
+    --rose-dk: #9b2a40;
+    --cream:   #fdf6f0;
+    --warm:    #f7ede3;
+    --ink:     #1a0a0f;
+    --ink2:    #3d1e28;
+    --muted:   #8a6070;
+    --gold:    #c9935a;
+    --gold-lt: #e8c4a0;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── 粒子背景 ── */
+  #canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── 布局 ── */
+  .wrapper {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .logo-mark {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 2rem;
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--rose-lt);
+    border: 0.5px solid rgba(232,100,122,0.4);
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(8px);
+    background: rgba(232,100,122,0.08);
+    animation: fadein 1s ease both;
+  }
+
+  h1 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: clamp(2.4rem, 7vw, 4.2rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.4rem;
+    animation: fadein 1s 0.1s ease both;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--rose);
+  }
+
+  .tagline {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 2.8rem;
+    animation: fadein 1s 0.2s ease both;
+  }
+
+  .cta-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadein 1s 0.35s ease both;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s;
+  }
+
+  .btn-primary {
+    background: var(--rose);
+    color: #fff;
+    box-shadow: 0 0 32px rgba(232,100,122,0.35);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 48px rgba(232,100,122,0.55);
+  }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    color: var(--cream);
+    border: 0.5px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+  }
+
+  .scroll-hint {
+    margin-top: 3.5rem;
+    color: rgba(255,255,255,0.2);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    animation: fadein 1s 0.8s ease both, bob 2s 1.5s ease-in-out infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(6px); }
+  }
+
+  .scroll-hint svg { opacity: 0.35; }
+
+  /* ── 分割线 ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 2rem;
+    margin: 0 auto;
+    max-width: 480px;
+    color: rgba(255,255,255,0.12);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* ── Features ── */
+  .section {
+    padding: 5rem 1.5rem;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--rose);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    text-align: center;
+    margin-bottom: 3.5rem;
+    color: var(--cream);
+    line-height: 1.4;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .feature {
+    padding: 2rem 1.75rem;
+    background: rgba(26,10,15,0.7);
+    backdrop-filter: blur(12px);
+    transition: background 0.2s;
+    border: 0.5px solid rgba(255,255,255,0.06);
+  }
+
+  .feature:hover {
+    background: rgba(232,100,122,0.06);
+  }
+
+  .feature-icon {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .feature h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 1.05rem;
+    color: var(--cream);
+    margin-bottom: 0.5rem;
+  }
+
+  .feature p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── 流程 ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 2.5rem;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 0.5px;
+    background: linear-gradient(to bottom, var(--rose), transparent);
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0 0 2.5rem 1.5rem;
+    position: relative;
+  }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--rose);
+    box-shadow: 0 0 12px rgba(232,100,122,0.6);
+  }
+
+  .step-num {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--rose);
+    margin-bottom: 0.2rem;
+  }
+
+  .step h4 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 1.05rem;
+    color: var(--cream);
+  }
+
+  .step p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── 打赏区 ── */
+  .donate-wrap {
+    background: linear-gradient(135deg, rgba(232,100,122,0.08) 0%, rgba(201,147,90,0.06) 100%);
+    border: 0.5px solid rgba(232,100,122,0.2);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    backdrop-filter: blur(12px);
+  }
+
+  .donate-wrap .heart-big {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 1.2rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.12); }
+  }
+
+  .donate-wrap h2 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: 1.5rem;
+    color: var(--cream);
+    margin-bottom: 0.8rem;
+  }
+
+  .donate-wrap p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1.8rem;
+  }
+
+  .donate-wrap p strong {
+    color: var(--gold-lt);
+    font-weight: 400;
+  }
+
+  /* QR 占位 */
+  .qr-placeholder {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 1.5rem;
+    border-radius: 12px;
+    border: 0.5px solid rgba(201,147,90,0.3);
+    background: rgba(201,147,90,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+
+  .qr-placeholder svg {
+    opacity: 0.5;
+  }
+
+  .qr-wrap {
+    margin: 0 auto 1.5rem;
+  }
+
+  .qr-img {
+    display: block;
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 12px;
+    border: 0.5px solid rgba(201,147,90,0.3);
+  }
+
+  /* ── Footer ── */
+  footer {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    border-top: 0.5px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.2);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    line-height: 1.9;
+  }
+
+  footer a {
+    color: rgba(255,255,255,0.3);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  footer a:hover { color: var(--rose-lt); }
+
+  /* ── 通用动画 ── */
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── 流动渐变分隔 ── */
+  .gradient-rule {
+    height: 0.5px;
+    background: linear-gradient(to right, transparent, rgba(232,100,122,0.4), transparent);
+    margin: 0 auto;
+    max-width: 320px;
+  }
+
+  /* ── 统计数字 ── */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    flex-wrap: wrap;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: var(--font-serif);
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 300;
+    color: var(--rose-lt);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  @media (max-width: 520px) {
+    .section { padding: 3.5rem 1.2rem; }
+    .donate-wrap { padding: 2rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="wrapper">
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+
+    <svg class="logo-mark" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="36" cy="36" r="35.5" stroke="rgba(232,100,122,0.25)" stroke-width="0.5"/>
+      <path d="M36 52 C36 52 18 41 18 28 C18 21.4 23.4 16 30 16 C33.2 16 36 18 36 18 C36 18 38.8 16 42 16 C48.6 16 54 21.4 54 28 C54 41 36 52 36 52Z" fill="rgba(232,100,122,0.15)" stroke="#e8647a" stroke-width="0.8"/>
+      <circle cx="26" cy="32" r="2" fill="#e8647a" opacity="0.6"/>
+      <circle cx="46" cy="26" r="1.5" fill="#e8c4a0" opacity="0.5"/>
+    </svg>
+
+    <span class="badge">每日寄送 · 像一封信</span>
+
+    <h1>用<em>点滴</em>积累<br>大爱</h1>
+    <p class="tagline">每一条暖心提醒，都是你们故事的一部分</p>
+
+    <div class="cta-group">
+      <a href="/auth" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        登录 / 注册
+      </a>
+      <a href="#about" class="btn btn-ghost">了解更多</a>
+    </div>
+
+    <div class="scroll-hint">
+      向下探索
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+
+  </section>
+
+  <!-- ── 统计 ── -->
+  <div class="stats reveal" id="about">
+    <div class="stat">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">每日提醒</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24h</div>
+      <div class="stat-label">全天守护</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0¥</div>
+      <div class="stat-label">永久免费</div>
+    </div>
+  </div>
+
+  <div class="gradient-rule"></div>
+
+  <!-- ── 功能 ── -->
+  <section class="section reveal">
+    <div class="section-label">FEATURES</div>
+    <h2 class="section-title">它能为你们做什么？</h2>
+
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">🌅</span>
+        <h3>每日早安推送</h3>
+        <p>在 Ta 睁开眼的那一刻，收到你精心设定的暖心早安，让每天从被爱开始。</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🗓️</span>
+        <h3>纪念日提醒</h3>
+        <p>恋爱纪念日、第一次牵手、初吻……把所有珍贵的日子都交给点滴记住。</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">✉️</span>
+        <h3>企业微信送达</h3>
+        <p>通过企业微信精准推送，消息直达手机通知，不会被淹没在信息流里。</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🌤️</span>
+        <h3>天气 · 节气 · 节日</h3>
+        <p>自动附上当日天气、节气提示，让提醒更有温度，更贴近生活节奏。</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔒</span>
+        <h3>私密安全</h3>
+        <p>属于你们两个人的空间，数据独立存储，无广告、无打扰、无数据贩卖。</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">☕</span>
+        <h3>公益运营</h3>
+        <p>由独立开发者维护，完全免费开放。如果觉得好用，一杯咖啡就是最大支持。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="gradient-rule"></div>
+
+  <!-- ── 使用流程 ── -->
+  <section class="section reveal">
+    <div class="section-label">HOW IT WORKS</div>
+    <h2 class="section-title">三步开始，一生相伴</h2>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <h4>注册账号，绑定企业微信</h4>
+        <p>免费注册，按引导配置企业微信机器人，整个过程大约 5 分钟。</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <h4>添加你们的纪念日与推送任务</h4>
+        <p>填入恋爱纪念日、对方生日，设定每天推送的时间与内容风格。</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <h4>每天自动送达，不再遗忘</h4>
+        <p>系统在指定时间自动推送，附带天气与节日信息，让每条消息都充满心意。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="gradient-rule"></div>
+
+  <!-- ── 打赏 ── -->
+  <section class="section reveal">
+    <div class="donate-wrap">
+      <span class="heart-big">☕</span>
+      <h2>如果点滴温暖了你们</h2>
+      <p>
+        这里是<strong>纯公益、无广告</strong>的平台，资源有限，全靠独立维护。<br>
+        制作不易，若本站对你们有帮助，欢迎通过下方二维码<strong>打赏一杯咖啡</strong>，<br>
+        支持我持续提供更好的服务。<br><br>
+        <strong>希望有情人终成眷属，愿你们的每一天都被温柔以待。❤️</strong>
+      </p>
+
+      <div class="qr-wrap">
+        <img src="wx.jpg" alt="赞赏码" class="qr-img" loading="lazy" decoding="async">
+      </div>
+
+      <a href="/auth" class="btn btn-primary" style="display:inline-flex;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        立即免费开始
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div style="margin-bottom:0.5rem; color: rgba(255,255,255,0.3); font-size:1.1rem;">💕</div>
+    点滴 · 情侣暖心提醒平台<br>
+    公益免费 · 无广告 · 独立维护<br>
+    <div style="margin:1rem 0 0.5rem;">
+      <a href="https://github.com/iCloudBot/wecom-admin" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:99px;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.6);font-size:0.8rem;text-decoration:none;letter-spacing:0.04em;transition:all 0.2s;background:rgba(255,255,255,0.04);"
+         onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.4)';this.style.background='rgba(255,255,255,0.1)'"
+         onmouseout="this.style.color='rgba(255,255,255,0.6)';this.style.borderColor='rgba(255,255,255,0.18)';this.style.background='rgba(255,255,255,0.04)'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="rgba(255,255,255,0.8)"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        开源 · GitHub
+      </a>
+    </div>
+    <span style="opacity:0.5;">© 2026 &nbsp;·&nbsp; <a href="/auth">登录</a> &nbsp;·&nbsp; <a href="/auth">注册</a></span>
+  </footer>
+
+</div><!-- /wrapper -->
+
+<script>
+/* ── 粒子背景 ── */
+(function(){
+  const canvas = document.getElementById('canvas')
+  const ctx = canvas.getContext('2d')
+  let W, H, particles = []
+
+  function resize(){
+    W = canvas.width  = window.innerWidth
+    H = canvas.height = window.innerHeight
+  }
+  resize()
+  window.addEventListener('resize', resize)
+
+  const colors = ['rgba(232,100,122,', 'rgba(232,196,160,', 'rgba(155,42,64,']
+
+  for(let i = 0; i < 55; i++){
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.6 + 0.4,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3 - 0.08,
+      alpha: Math.random() * 0.35 + 0.05,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    })
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H)
+    for(const p of particles){
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+      ctx.fillStyle = p.color + p.alpha + ')'
+      ctx.fill()
+      p.x += p.vx; p.y += p.vy
+      if(p.y < -5) p.y = H + 5
+      if(p.x < -5) p.x = W + 5
+      if(p.x > W + 5) p.x = -5
+    }
+    requestAnimationFrame(draw)
+  }
+  draw()
+})()
+
+/* ── Scroll reveal ── */
+const reveals = document.querySelectorAll('.reveal')
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target) }
+  })
+}, { threshold: 0.12 })
+reveals.forEach(el => io.observe(el))
+</script>
+</body>
+</html>
